@@ -17,43 +17,46 @@ if 'response' not in st.session_state:
     st.session_state['response'] = None
 
 # Estilos CSS para melhorar o design
-st.markdown("""
-    <style>
-    .stButton button {
-        background-color: #4CAF50;
-        color: white;
-        border-radius: 12px;
-        padding: 10px 24px;
-        font-size: 16px;
-    }
-    .stTextInput input {
-        border-radius: 12px;
-        padding: 10px;
-    }
-    .stTextInput label {
-        font-weight: bold;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# st.markdown("""
+#     <style>
+#     .stButton button {
+#         background-color: #4CAF50;
+#         color: white;
+#         border-radius: 12px;
+#         padding: 10px 24px;
+#         font-size: 16px;
+#     }
+#     .stTextInput input {
+#         border-radius: 12px;
+#         padding: 10px;
+#     }
+#     .stTextInput label {
+#         font-weight: bold;
+#     }
+#     </style>
+# """, unsafe_allow_html=True)
+
+SideL, SideR = st.columns((1, 1))
 
 # Título da página
-st.title("Mapas Mentais 🤖🧠")
+with SideL:
+    st.title("Mapas Mentais 🤖🧠")
 
 # Espaçamento para centralizar os elementos
 st.header("")
 
-SideL, SideR = st.columns((1, 1))
 
 with st.sidebar:
     api_key = st.text_input("Insira sua OpenAI API key:", type="password")
 
-with SideL:
+with SideR:
     # Criar uma barra de pesquisa e um botão de pesquisa
-    MarginL, col1, col2m, MarginR = st.columns((0.5, 2, 1, 0.5))
+    col1, col2m = st.columns((2, 1.2))
     with col1:
-        search_query = st.text_input("Qual o tema principal ❓", "")
+        search_query = st.text_input("Tema de estudo 📚🎯", "")
     with col2m:
-        search_button = st.button("Pesquisar 🔎")
+        search_button = st.button("Mapa Mental 🗺️🧠")
+        Estudar = st.button("Árvore de Conhecimento 🌳📚", disabled=True)
 
 # Ação ao clicar no botão de pesquisa
 if search_button:
@@ -63,7 +66,9 @@ if search_button:
         st.write(f"Você pesquisou por: **{search_query}**")
 
         # Configurar o LLM da OpenAI com a chave da API
-        llm = OpenAI(openai_api_key=api_key, temperature=0, max_tokens=1500)
+        llm = OpenAI(openai_api_key=api_key,
+                    temperature=0,
+                    max_tokens=1500)
 
         # Criar um prompt template
         prompt_template = """
@@ -107,49 +112,48 @@ if search_button:
             st.text("Resposta do LLM:")
             st.text(response)
 
-with SideR:
-    # Exibir o gráfico se os dados estiverem disponíveis
-    if st.session_state['nodes_data'] and st.session_state['edges_data']:
-        # Definir cores e tamanhos dos nós baseados na importância e nível
-        def get_node_size(importance):
-            return 15 + importance * 5  # Tamanho baseado na importância
+# Exibir o gráfico se os dados estiverem disponíveis
+if st.session_state['nodes_data'] and st.session_state['edges_data']:
+    # Definir cores e tamanhos dos nós baseados na importância e nível
+    def get_node_size(importance):
+        return 15 + importance * 5  # Tamanho baseado na importância
 
-        def get_node_color(level):
-            colors = ['#FFD700', '#FF8C00', '#FF4500', '#FF6347', '#8B0000']  # Cores de acordo com o nível
-            return colors[level % len(colors)]  # Seleciona cor baseado no nível hierárquico
+    def get_node_color(level):
+        colors = ['#FFD700', '#FF8C00', '#FF4500', '#FF6347', '#8B0000']  # Cores de acordo com o nível
+        return colors[level % len(colors)]  # Seleciona cor baseado no nível hierárquico
 
-        node_objects = [
-            Node(
-                id=str(node["id"]),
-                label=node["label"],
-                size=get_node_size(node.get("importance", 1)),
-                color=get_node_color(node.get("level", 0)),
-                title=node["description"]
-            )
-            for node in st.session_state['nodes_data']
-        ]
-
-        edge_objects = [
-            Edge(
-                source=str(edge["source"]),
-                target=str(edge["target"]),
-                label=edge["label"]
-            )
-            for edge in st.session_state['edges_data']
-        ]
-
-        # Configuração para o agraph
-        config = Config(
-            width=950, height=750, directed=True, 
-            physics=True, hierarchical=False,
-            nodeHighlightBehavior=True, 
-            maxZoom=2, minZoom=0.5,
-            link={'label': 'true'}  # Exibir labels nas arestas
+    node_objects = [
+        Node(
+            id=str(node["id"]),
+            label=node["label"],
+            size=get_node_size(node.get("importance", 1)),
+            color=get_node_color(node.get("level", 0)),
+            title=node["description"]
         )
+        for node in st.session_state['nodes_data']
+    ]
 
-        # Exibir o gráfico
-        return_value = agraph(nodes=node_objects, edges=edge_objects, config=config)
+    edge_objects = [
+        Edge(
+            source=str(edge["source"]),
+            target=str(edge["target"]),
+            label=edge["label"]
+        )
+        for edge in st.session_state['edges_data']
+    ]
 
-        # Exibir a resposta JSON bruta
-        with st.expander("Ver JSON gerado"):
-            st.json(st.session_state['response'])
+    # Configuração para o agraph
+    config = Config(
+        width=1500, height=750, directed=True, 
+        physics=False, hierarchical=False,
+        nodeHighlightBehavior=True, 
+        maxZoom=2, minZoom=0.5,
+        link={'label': 'false'}  # Exibir labels nas arestas
+    )
+
+    # Exibir o gráfico
+    return_value = agraph(nodes=node_objects, edges=edge_objects, config=config)
+
+    # Exibir a resposta JSON bruta
+    with st.expander("Ver JSON gerado"):
+        st.json(st.session_state['response'])
