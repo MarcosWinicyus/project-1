@@ -6,7 +6,7 @@ import json
 
 # Definir o layout da página como centralizado
 st.set_page_config(layout="wide", 
-                   page_title="Mapas Mentais 🤖", page_icon="🧠")
+                   page_title="3Knowledge 🌳🧠", page_icon="🌳🧠")
 
 # Função para inicializar variáveis de estado
 if 'nodes_data' not in st.session_state:
@@ -15,56 +15,40 @@ if 'edges_data' not in st.session_state:
     st.session_state['edges_data'] = None
 if 'response' not in st.session_state:
     st.session_state['response'] = None
+if 'response_history' not in st.session_state:
+    st.session_state['response_history'] = []  # Armazenar respostas anteriores
 
-# Estilos CSS para melhorar o design
-# st.markdown("""
-#     <style>
-#     .stButton button {
-#         background-color: #4CAF50;
-#         color: white;
-#         border-radius: 12px;
-#         padding: 10px 24px;
-#         font-size: 16px;
-#     }
-#     .stTextInput input {
-#         border-radius: 12px;
-#         padding: 10px;
-#     }
-#     .stTextInput label {
-#         font-weight: bold;
-#     }
-#     </style>
-# """, unsafe_allow_html=True)
 
-SideL, SideR = st.columns((1, 1))
+
+st.title("3Knowledge 🌳🧠")
+
+
+SideL, SideR = st.columns((1,0.2))
 
 # Título da página
-with SideL:
-    st.title("Mapas Mentais 🤖🧠")
-
-# Espaçamento para centralizar os elementos
-st.header("")
 
 
 with st.sidebar:
     api_key = st.text_input("Insira sua OpenAI API key:", type="password")
 
 with SideR:
+    search_query = st.text_input("Tema de estudo 📚🔎", "")
     # Criar uma barra de pesquisa e um botão de pesquisa
-    col1, col2m = st.columns((2, 1.2))
+    col1, col2 = st.columns((2, 1.2))
+    
+    
+    # with col2m:
     with col1:
-        search_query = st.text_input("Tema de estudo 📚🎯", "")
-    with col2m:
         search_button = st.button("Mapa Mental 🗺️🧠")
-        Estudar = st.button("Árvore de Conhecimento 🌳📚", disabled=True)
+    
+    with col2:
+        Estudar = st.button("3K 🌳📚", disabled=True)
 
 # Ação ao clicar no botão de pesquisa
 if search_button:
     if not api_key:
         st.error("Por favor, insira sua OpenAI API key.")
-    elif search_query:
-        st.write(f"Você pesquisou por: **{search_query}**")
-
+    else:
         # Configurar o LLM da OpenAI com a chave da API
         llm = OpenAI(openai_api_key=api_key,
                     temperature=0,
@@ -73,12 +57,12 @@ if search_button:
         # Criar um prompt template
         prompt_template = """
         Você é um especialista em criação de mapas mentais. Gere um mapa mental estruturado e detalhado para o tópico "{topic}".
-        1. Para cada conceito, inclua seu nome, importância (como número de 1 a 5) e uma breve explicação sobre sua função.
+        1. Para cada conceito, inclua seu nome, importância (como número de 1 a 5)
         2. Relacione os conceitos de forma que o mapa mental seja coeso e reflita a interdependência dos elementos.
         3. As relações entre os conceitos devem ser claramente nomeadas, indicando o tipo de conexão (ex: "causa", "depende de", "é parte de").
         4. O mapa mental deve seguir uma hierarquia lógica, com os conceitos mais amplos no topo e seus subconceitos de forma hierárquica abaixo.
         5. A saída deve estar no formato JSON e conter duas chaves: "nodes" e "edges".
-        - "nodes" deve ser uma lista de dicionários contendo "id", "label", "importance", "description" e "level" (o nível hierárquico do conceito).
+        - "nodes" deve ser uma lista de dicionários contendo "id", "label", "importance",e "level" (o nível hierárquico do conceito).
         - "edges" deve ser uma lista de dicionários contendo "source", "target" e "label" (explicando a relação entre os nós).
         6. O JSON deve estar completo, válido e sem cortes ou quebras.
         7. Não inclua explicações adicionais ou texto antes ou depois do JSON.
@@ -107,53 +91,71 @@ if search_button:
             st.session_state['edges_data'] = data["edges"]
             st.session_state['response'] = response
 
+            # Armazenar a resposta no histórico
+            st.session_state['response_history'].append(response)
+
         except Exception as e:
             st.error(f"Erro ao analisar a resposta: {e}")
             st.text("Resposta do LLM:")
             st.text(response)
 
-# Exibir o gráfico se os dados estiverem disponíveis
-if st.session_state['nodes_data'] and st.session_state['edges_data']:
-    # Definir cores e tamanhos dos nós baseados na importância e nível
-    def get_node_size(importance):
-        return 15 + importance * 5  # Tamanho baseado na importância
+with SideL:
+    # Exibir o gráfico se os dados estiverem disponíveis
+    if st.session_state['nodes_data'] and st.session_state['edges_data']:
+        # Definir cores e tamanhos dos nós baseados na importância e nível
+        def get_node_size(importance):
+            return 15 + importance * 5  # Tamanho baseado na importância
 
-    def get_node_color(level):
-        colors = ['#FFD700', '#FF8C00', '#FF4500', '#FF6347', '#8B0000']  # Cores de acordo com o nível
-        return colors[level % len(colors)]  # Seleciona cor baseado no nível hierárquico
+        def get_node_color(level):
+            # Tons de verde para o tema dark
+            colors = ['#006400', '#228B22', '#32CD32', '#7CFC00', '#ADFF2F']
+            return colors[level % len(colors)]  # Seleciona cor baseado no nível hierárquico
 
-    node_objects = [
-        Node(
-            id=str(node["id"]),
-            label=node["label"],
-            size=get_node_size(node.get("importance", 1)),
-            color=get_node_color(node.get("level", 0)),
-            title=node["description"]
+        node_objects = [
+            Node(
+                id=str(node["id"]),
+                label=node["label"],
+                size=get_node_size(node.get("importance", 1)),
+                color=get_node_color(node.get("level", 0)),
+                font={'color': 'white', 'size': 12} 
+                # title=node["description"]
+            )
+            for node in st.session_state['nodes_data']
+        ]
+
+        edge_objects = [
+            Edge(
+                source=str(edge["source"]),
+                target=str(edge["target"]),
+                label=edge["label"]
+            )
+            for edge in st.session_state['edges_data']
+        ]
+
+        # Configuração para o agraph
+        config = Config(
+            width=1500, height=750, directed=True, 
+            physics=False, hierarchical=False,
+            nodeHighlightBehavior=True, 
+            maxZoom=2, minZoom=0.5,
+            link={'label': True},  # Exibir labels nas arestas
+            linkDistance=1000,  # Aumentar a distância mínima entre as arestas
+            theme='dark',  # Tema dark
+            collapsible=False  # Desabilitar o link ao clicar nos nós
         )
-        for node in st.session_state['nodes_data']
-    ]
 
-    edge_objects = [
-        Edge(
-            source=str(edge["source"]),
-            target=str(edge["target"]),
-            label=edge["label"]
-        )
-        for edge in st.session_state['edges_data']
-    ]
+        # Exibir o gráfico
+        return_value = agraph(nodes=node_objects, edges=edge_objects, config=config)
 
-    # Configuração para o agraph
-    config = Config(
-        width=1500, height=750, directed=True, 
-        physics=False, hierarchical=False,
-        nodeHighlightBehavior=True, 
-        maxZoom=2, minZoom=0.5,
-        link={'label': 'false'}  # Exibir labels nas arestas
-    )
+        # Exibir a resposta JSON bruta
+        with st.expander("Ver JSON gerado"):
+            st.json(st.session_state['response'])
 
-    # Exibir o gráfico
-    return_value = agraph(nodes=node_objects, edges=edge_objects, config=config)
 
-    # Exibir a resposta JSON bruta
-    with st.expander("Ver JSON gerado"):
-        st.json(st.session_state['response'])
+with SideR:
+    # Exibir o histórico de respostas
+    if st.session_state['response_history']:
+        st.subheader("Histórico de Respostas")
+        for i, resp in enumerate(st.session_state['response_history']):
+            with st.expander(f"Resposta {i+1}"):
+                st.json(resp)
