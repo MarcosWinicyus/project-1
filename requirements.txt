@@ -2,3 +2,4 @@ streamlit
 streamlit-agraph
 langchain
 langchain_openai
+st-paywall

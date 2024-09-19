@@ -1,8 +1,23 @@
 import streamlit as st
+from st_paywall import add_auth
 from streamlit_agraph import agraph, Node, Edge, Config
 from langchain_openai import OpenAI
 from langchain.prompts import PromptTemplate
 import json
+
+
+add_auth(required=True,
+        login_button_text="Login with Google",
+        login_button_color="#FD504D",
+        login_sidebar=False)
+
+# ONLY AFTER THE AUTHENTICATION + SUBSCRIPTION, THE USER WILL SEE THIS ⤵
+# The email and subscription status is stored in session state.
+st.write(f"Subscription Status: {st.session_state.user_subscribed}")
+st.write("🎉 Yay! You're all set and subscribed! 🎉")
+st.write(f'By the way, your email is: {st.session_state.email}')
+
+
 
 # Definir o layout da página como centralizado
 st.set_page_config(layout="wide", 
@@ -77,8 +92,6 @@ def run_ai():
             st.text("Resposta do LLM:")
             st.text(response)
 
-
-
 st.title("Árvore de Conhecimento🌳🧠")
 
 with st.sidebar:
@@ -139,7 +152,7 @@ with st.container(border=True):
             for edge in st.session_state['edges_data']
         ]
 
-        # Configuração para o agraph
+        # Configuração para o agrap
         config = Config(
             width='720vh',
             height=500,
