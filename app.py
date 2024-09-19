@@ -5,6 +5,9 @@ from langchain_openai import OpenAI
 from langchain.prompts import PromptTemplate
 import json
 
+# Definir o layout da página como centralizado
+st.set_page_config(layout="wide", 
+                   page_title="3Knowledge 🌳🧠", page_icon="🌳🧠")
 
 add_auth(required=True,
         login_button_text="Login with Google",
@@ -17,11 +20,6 @@ st.write(f"Subscription Status: {st.session_state.user_subscribed}")
 st.write("🎉 Yay! You're all set and subscribed! 🎉")
 st.write(f'By the way, your email is: {st.session_state.email}')
 
-
-
-# Definir o layout da página como centralizado
-st.set_page_config(layout="wide", 
-                   page_title="3Knowledge 🌳🧠", page_icon="🌳🧠")
 
 # Função para inicializar variáveis de estado
 if 'nodes_data' not in st.session_state:
