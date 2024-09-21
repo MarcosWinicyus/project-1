@@ -1,3 +1,4 @@
+
 import streamlit as st
 from st_paywall import add_auth
 from streamlit_agraph import agraph, Node, Edge, Config
@@ -6,9 +7,13 @@ from langchain.prompts import PromptTemplate
 import json
 import re
 
+from langchain_community.tools import WikipediaQueryRun
+from langchain_community.utilities import WikipediaAPIWrapper
+
+
+
 # Definir o layout da página como centralizado
-st.set_page_config(layout="wide",
-                   page_title="3Knowledge 🌳🧠", page_icon="🌳🧠")
+st.set_page_config(layout="wide", page_title="3Knowledge 🌳🧠", page_icon="🌳🧠")
 
 add_auth(required=True,
          login_button_text="Login with Google",
@@ -27,8 +32,18 @@ def initialize_session_state():
         st.session_state['response_history'] = []  # Armazenar respostas anteriores
     if 'search_query' not in st.session_state:
         st.session_state['search_query'] = None
+    if 'wiki_content' not in st.session_state:
+        st.session_state['wiki_content'] = None
 
 initialize_session_state()
+
+# Função para buscar conteúdo da Wikipedia
+def search_wikipedia(query):
+    wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(lang="pt"))
+
+    search_result = wikipedia.run(query)
+    
+    return search_result
 
 # Função para executar o LLM
 def run_ai(query):
@@ -37,13 +52,11 @@ def run_ai(query):
         st.error("API key não encontrada. Por favor, verifique seu arquivo secrets.toml.")
     else:
         # Configurar o LLM da OpenAI com a chave da API
-        llm = OpenAI(openai_api_key=api_key,
-                     temperature=0,
-                     max_tokens=3000)
+        llm = OpenAI(openai_api_key=api_key, temperature=0, max_tokens=3000)
 
         # Criar um prompt template
         prompt_template = """
-        Você é um especialista em criação de mapas mentais, representado árvores de conteúdos principais "Nodes" e suas conexoes que representam, o objetivo e ter uma organização didática dos conteudos.
+        Você é um especialista em criação de mapas mentais, representando árvores de conteúdos principais "Nodes" e suas conexões. O objetivo é ter uma organização didática dos conteúdos.
         1. Para cada conceito, inclua seu nome, importância (como número de 1 a 5) e nível hierárquico (level).
         2. Relacione os conceitos de forma que o mapa mental seja coeso e reflita a interdependência dos elementos.
         3. O mapa mental deve seguir uma hierarquia lógica, com os conceitos mais amplos no topo e seus subconceitos de forma hierárquica abaixo.
@@ -58,11 +71,7 @@ def run_ai(query):
         Gere um mapa mental estruturado e detalhado para o tópico "{topic}"
         """
 
-        prompt = PromptTemplate(
-            input_variables=["topic"],
-            template=prompt_template,
-        )
-
+        prompt = PromptTemplate(input_variables=["topic"], template=prompt_template)
         final_prompt = prompt.format(topic=query)
 
         # Obter a resposta do LLM
@@ -141,19 +150,19 @@ def display_graph():
 
 # Interface do Usuário
 def main():
-
     if not st.session_state['search_query']:
         st.header("Árvore de Conhecimento 🌳🧠")
     else:
         st.header(f"🌳 {st.session_state['search_query']} 🧠")    
 
     with st.sidebar:
-
         st.header("Pesquisa:")
         st.session_state['search_query'] = st.text_input("Tema principal 📚🔎", "")
         search_button = st.button("Mapa Mental 🗺️🧠")
 
         if search_button and st.session_state['search_query']:
+            # Executar busca na Wikipedia e o LLM
+            st.session_state['wiki_content'] = search_wikipedia(st.session_state['search_query'])
             run_ai(st.session_state['search_query'])
 
         # Exibir o histórico de pesquisas como botões
@@ -162,20 +171,23 @@ def main():
             for i, entry in enumerate(st.session_state['response_history']):
                 query_label = entry['query']
                 if st.button(query_label, key=f'history_{i}'):
-                    # Quando o botão é clicado, atualiza os dados dos nós e arestas
                     st.session_state['nodes_data'] = entry['response']['nodes']
                     st.session_state['edges_data'] = entry['response']['edges']
                     st.session_state['response'] = entry['response']
                     st.session_state['search_query'] = query_label
 
-        
         st.write(f"Subscription Status: {st.session_state.user_subscribed}")
-        st.write("🎉 Otimo! Você é um usuario Premium! 🎉")
+        st.write("🎉 Otimo! Você é um usuário Premium! 🎉")
         st.write(f'Usuario: {st.session_state.email}')
 
     # Exibir o gráfico
     with st.container(border=True):
         display_graph()
+
+    # Exibir conteúdo da Wikipedia
+    if st.session_state['wiki_content']:
+        st.subheader(f"Conteúdo da Wikipedia para: {st.session_state['search_query']}")
+        st.write(st.session_state['wiki_content'])
 
 if __name__ == "__main__":
     main()

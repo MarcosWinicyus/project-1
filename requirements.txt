@@ -3,3 +3,5 @@ streamlit-agraph
 langchain
 langchain_openai
 st-paywall
+langchain-community
+wikipedia
