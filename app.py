@@ -10,10 +10,10 @@ from graph import display_graph
 # Definir o layout da página como centralizado
 st.set_page_config(layout="wide", page_title="3Knowledge 🌳🧠", page_icon="🌳🧠")
 
-# add_auth(required=False,
-#          login_button_text="Login with Google",
-#          login_button_color="#FD504D",
-#          login_sidebar=False)
+add_auth(required=True,
+         login_button_text="Login with Google",
+         login_button_color="#FD504D",
+         login_sidebar=False)
 
 initialize_session_state()
 
@@ -43,9 +43,9 @@ def main():
                     st.session_state['response'] = entry['response']
                     st.session_state['search_query'] = query_label
 
-        # st.write(f"Subscription Status: {st.session_state.user_subscribed}")
-        # st.write("🎉 Otimo! Você é um usuário Premium! 🎉")
-        # st.write(f'Usuario: {st.session_state.email}')
+        st.write(f"Subscription Status: {st.session_state.user_subscribed}")
+        st.write("🎉 Otimo! Você é um usuário Premium! 🎉")
+        st.write(f'Usuario: {st.session_state.email}')
 
     # Exibir o gráfico
     with st.container(border=True):
