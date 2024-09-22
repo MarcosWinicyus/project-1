@@ -17,6 +17,26 @@ initialize_session_state()
 
 def main():
 
+    col1, col2 = st.columns(2, gap="small", vertical_alignment="center")
+    with col1:
+        try:
+            st.image("C:\\Users\\Marcos Vinicius\\Documents\\Notebooks\\Project 1\\project-1\\images\\logo_1.png", width=300)
+        except:
+            st.image("./images/logo_1.png", width=300) 
+
+    with col2:
+        st.title("Sua árvore de conhecimento! 🌳🧠", anchor=False)
+        st.write(
+            "Pesquias ramificadas e inteligentes, ageregando infomações de diversas fonte."
+        )
+
+
+    add_auth(required=True,
+        login_button_text="Login com Google",
+        login_button_color="#FD504D",
+        login_sidebar=False)
+    
+
     if st.session_state['user_subscribed'] == True:
         if not st.session_state['search_query']:
             st.header("Árvore de Conhecimento 🌳🧠")
@@ -55,27 +75,7 @@ def main():
         if st.session_state['wiki_content']:
             st.subheader(f"Conteúdo da Wikipedia para: {st.session_state['search_query']}")
             st.write(st.session_state['wiki_content'])
-    else:
 
-        col1, col2 = st.columns(2, gap="small", vertical_alignment="center")
-        with col1:
-            try:
-                st.image("C:\\Users\\Marcos Vinicius\\Documents\\Notebooks\\Project 1\\project-1\\images\\logo_1.png", width=300)
-            except:
-                st.image("./images/logo_1.png", width=300) 
-
-        with col2:
-            st.title("Sua árvore de conhecimento! 🌳🧠", anchor=False)
-            st.write(
-                "Pesquias ramificadas e inteligentes, ageregando infomações de diversas fonte."
-            )
-
-
-        add_auth(required=False,
-         login_button_text="Login com Google",
-         login_button_color="#FD504D",
-         login_sidebar=False)
-        
 
 if __name__ == "__main__":
     main()
