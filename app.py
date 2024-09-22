@@ -13,9 +13,9 @@ st.set_page_config(
                    page_title="3Knowledge 🌳🧠",
                    page_icon="🌳🧠")
 
+initialize_session_state()
 
 def main():
-    initialize_session_state()
 
     if st.session_state['user_subscribed'] == True:
         if not st.session_state['search_query']:
