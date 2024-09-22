@@ -76,8 +76,10 @@ def main():
 
         # Exibir conteúdo da Wikipedia
         if st.session_state['wiki_content']:
-            st.subheader(f"Conteúdo da Wikipedia para: {st.session_state['search_query']}")
-            st.write(st.session_state['wiki_content'])
-
+            st.subheader(f"Resultados Pesquisa 🔎: {st.session_state['search_query']}")
+            for page in st.session_state['wiki_content'].split('Page: '):
+                if page != "":
+                    with st.expander(page.split("Summary:")[0]):
+                        st.markdown(page.split("Summary:")[1])
 if __name__ == "__main__":
     main()
