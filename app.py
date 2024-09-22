@@ -36,7 +36,7 @@ def main():
     
     col1, col2 = st.columns(2, gap="small", vertical_alignment="center")
 
-    if st.session_state['user_subscribed'] == False:
+    if st.session_state['user_subscribed'] == True:
 
         with st.sidebar:
             
