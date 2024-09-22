@@ -63,7 +63,7 @@ def main():
         if search_button and st.session_state['search_query']:
             run_agent()
 
-        with st.container(border=True):
+        with st.expander(f"🌳🧠 Árvore -> {st.session_state['search_query']}"):
             display_graph()
 
        
