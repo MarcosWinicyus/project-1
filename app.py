@@ -29,10 +29,10 @@ def main():
 
 
     
-    # add_auth(required=False,
-    #     login_button_text="Login com Google",
-    #     login_button_color="#FD504D",
-    #     login_sidebar=False)
+    add_auth(required=True,
+        login_button_text="Login com Google",
+        login_button_color="#FD504D",
+        login_sidebar=False)
     
     col1, col2 = st.columns(2, gap="small", vertical_alignment="center")
 
@@ -78,7 +78,6 @@ def main():
         if st.session_state['wiki_content']:
             st.subheader(f"Conteúdo da Wikipedia para: {st.session_state['search_query']}")
             st.write(st.session_state['wiki_content'])
-
 
 if __name__ == "__main__":
     main()
