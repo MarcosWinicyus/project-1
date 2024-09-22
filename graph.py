@@ -45,6 +45,6 @@ def display_graph():
         # Exibir o gráfico
         return_value = agraph(nodes=node_objects, edges=edge_objects, config=config)
 
-        # st.write(return_value)
-    else:
-        st.info("Por favor, insira um tema e clique em 'Mapa Mental 🗺️🧠' para gerar o mapa mental.")
+        st.write(return_value)
+    # else:
+        # st.info("Por favor, insira um tema e clique em 'Mapa Mental 🗺️🧠' para gerar o mapa mental.")

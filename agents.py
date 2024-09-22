@@ -93,7 +93,8 @@ def run_ai(query, context=''):
                 # Armazenar a resposta no histórico
                 st.session_state['response_history'].append({
                     'query': query,
-                    'response': data
+                    'response': data,
+                    'wiki_content': context
                 })
             else:
                 raise ValueError("A resposta não contém um JSON válido.")
