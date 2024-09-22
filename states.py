@@ -13,3 +13,6 @@ def initialize_session_state():
         st.session_state['search_query'] = None
     if 'wiki_content' not in st.session_state:
         st.session_state['wiki_content'] = None
+    if 'user_subscribed' not in st.session_state:
+        st.session_state['user_subscribed'] = False
+        
